@@ -31,7 +31,7 @@ class MainWindow(QMainWindow):
         self.ui.Start_Button.setEnabled(False)
 
         # Make certain fields read-only
-        self.ui.Reference_String_Line_Edit.setReadOnly(True)
+        # self.ui.Reference_String_Line_Edit.setReadOnly(True)
         self.ui.Hit_Miss_Line_Edit.setReadOnly(True)
         self.ui.Page_Faults_Line_Edit.setReadOnly(True)
 

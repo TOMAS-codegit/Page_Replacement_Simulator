@@ -7,6 +7,8 @@ class OptimalSimulator:
         self.ui = ui
         self.reference_string = []
         self.frames = []
+        self.frame_ages = {}  # Track addition order as age per frame page
+        self.age_counter = 0  # Incremental counter for ages
         self.max_frames = 0
         self.current_index = 0
         self.page_faults = 0
@@ -16,6 +18,8 @@ class OptimalSimulator:
         self.reference_string = reference_string.split()
         self.max_frames = max_frames
         self.frames = []
+        self.frame_ages = {}
+        self.age_counter = 0
         self.current_index = 0
         self.page_faults = 0
         self.ui.Hit_Miss_Line_Edit.setText("")
@@ -49,10 +53,19 @@ class OptimalSimulator:
             page_added = True
             if len(self.frames) < self.max_frames:
                 self.frames.append(page)
+                self.frame_ages[page] = self.age_counter
+                self.age_counter += 1
             else:
                 to_replace = self.get_optimal_replacement()
                 replace_index = self.frames.index(to_replace)
+                # Replace frame
+                replaced_frame = self.frames[replace_index]
                 self.frames[replace_index] = page
+                # Remove old frame age and assign new frame age
+                if replaced_frame in self.frame_ages:
+                    del self.frame_ages[replaced_frame]
+                self.frame_ages[page] = self.age_counter
+                self.age_counter += 1
 
         # Display Current Frame state (before replacement)
         for f in old_frames:
@@ -86,8 +99,27 @@ class OptimalSimulator:
     # Determines the optimal page to replace based on future references.
     def get_optimal_replacement(self):
         future = self.reference_string[self.current_index + 1:]
-        index_map = {f: (future.index(f) if f in future else float('inf')) for f in self.frames}
-        return max(index_map, key=index_map.get)
+        index_map = {}
+        for f in self.frames:
+            if f in future:
+                index_map[f] = future.index(f)
+            else:
+                index_map[f] = float('inf')
+
+        # Find the max next use index
+        max_index = max(index_map.values())
+
+        # Candidates with max index
+        candidates = [f for f, idx in index_map.items() if idx == max_index]
+
+        # If multiple frames not used again (index == inf), pick the oldest by age
+        if max_index == float('inf') and len(candidates) > 1:
+            # Choose candidate with smallest age (oldest)
+            oldest_candidate = min(candidates, key=lambda f: self.frame_ages.get(f, float('inf')))
+            return oldest_candidate
+
+        # Else pick the frame with max next use index
+        return candidates[0]
 
     # Clears the layouts of the Current_Process, Added_Page, and New_Process frames.
     def clear_layouts(self):
@@ -121,6 +153,8 @@ class OptimalSimulator:
     def clear_simulation(self):
         self.reference_string = []
         self.frames = []
+        self.frame_ages = {}
+        self.age_counter = 0
         self.max_frames = 0
         self.current_index = 0
         self.page_faults = 0
@@ -134,3 +168,4 @@ class OptimalSimulator:
         self.ui.Frame_Line_Edit.setText("")
         self.ui.Completion_Label.setVisible(False)
         self.ui.Algorithm_Line_Edit.setText("")
+

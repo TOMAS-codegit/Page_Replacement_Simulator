@@ -2,7 +2,6 @@ from PySide6.QtWidgets import QLabel
 from PySide6.QtCore import Qt
 
 class FifoSimulator:
-    # Initializes the FIFO simulator with the UI object.
     def __init__(self, ui):
         self.ui = ui
         self.reference_string = []
@@ -11,7 +10,6 @@ class FifoSimulator:
         self.current_index = 0
         self.page_faults = 0
 
-    # Starts the FIFO simulation with the given reference string and number of frames.
     def start(self, reference_string, max_frames):
         self.reference_string = reference_string.split()
         self.max_frames = max_frames
@@ -24,7 +22,6 @@ class FifoSimulator:
         self.clear_layouts()
         self.process_current_page()
 
-    # Processes the next page in the reference string.
     def next(self):
         self.current_index += 1
         if self.current_index < len(self.reference_string):
@@ -32,7 +29,6 @@ class FifoSimulator:
         else:
             self.ui.Completion_Label.setVisible(True)
 
-    # Processes the current page based on the FIFO algorithm.
     def process_current_page(self):
         self.clear_layouts()
 
@@ -47,42 +43,45 @@ class FifoSimulator:
             self.page_faults += 1
             self.ui.Page_Faults_Line_Edit.setText(str(self.page_faults))
 
-        # Current_Process view
-        for i, p in enumerate(self.frames):
-            if not is_hit and len(self.frames) >= self.max_frames and i == len(self.frames) - 1:
-                self.add_box_to_frame(self.ui.Current_Process, p, "#D32F2F")  # remove color
+        # Determine removed page but do not modify yet
+        removed_page = None
+        if not is_hit and len(self.frames) >= self.max_frames:
+            removed_page = self.frames[0]
+
+        # Show Current_Process BEFORE update
+        for p in self.frames:
+            if removed_page == p:
+                self.add_box_to_frame(self.ui.Current_Process, p, "#D32F2F")  # red = to be removed
             elif is_hit and p == page:
-                self.add_box_to_frame(self.ui.Current_Process, p, "#4CAF50")  # hit color
+                self.add_box_to_frame(self.ui.Current_Process, p, "#4CAF50")  # green = hit
             else:
                 self.add_box_to_frame(self.ui.Current_Process, p)
 
-        # Added_Page view
+        # Show the page to be added
         self.add_box_to_frame(self.ui.Added_Page, page)
 
-        # FIFO logic
+        # Apply FIFO logic (NOW modify frames)
         page_added = False
         if not is_hit:
-            if len(self.frames) >= self.max_frames:
-                self.frames.pop(0)  # Remove the oldest
+            if removed_page:
+                self.frames.pop(0)
             self.frames.append(page)
             page_added = True
 
-        # New_Process view 
+        # Show New_Process AFTER update
         for p in self.frames:
             if page_added and p == page:
-                self.add_box_to_frame(self.ui.New_Process, p, "#2196F3")  # new page color
+                self.add_box_to_frame(self.ui.New_Process, p, "#2196F3")  # blue = new
             elif is_hit and p == page:
-                self.add_box_to_frame(self.ui.New_Process, p, "#4CAF50")  # hit color
+                self.add_box_to_frame(self.ui.New_Process, p, "#4CAF50")  # green = hit
             else:
                 self.add_box_to_frame(self.ui.New_Process, p)
 
-    # Clears the layouts of the current process, added page, and new process frames.
     def clear_layouts(self):
         self.clear_frame(self.ui.Current_Process)
         self.clear_frame(self.ui.Added_Page)
         self.clear_frame(self.ui.New_Process)
 
-    # Clears all widgets from the given frame.
     def clear_frame(self, frame):
         layout = frame.layout()
         if layout:
@@ -92,7 +91,6 @@ class FifoSimulator:
                 if widget:
                     widget.setParent(None)
 
-    # Adds the frame on the simulation screen with the given page and color.
     def add_box_to_frame(self, frame, text, color=None):
         label = QLabel(text)
         style = "border: 1px solid #555; border-radius: 5px; padding: 5px; font-size: 16px; color: white;"
@@ -104,7 +102,6 @@ class FifoSimulator:
         if layout:
             layout.addWidget(label)
 
-    # Clears the simulation and resets the UI.
     def clear_simulation(self):
         self.reference_string = []
         self.frames = []
