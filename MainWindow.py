@@ -55,7 +55,7 @@ class MainWindow(QMainWindow):
 
         # Window settings
         self.setWindowTitle("Page Replacement Algorithms")
-        self.setMinimumSize(1000, 800)  # reasonable default
+        self.setMinimumSize(800, 600)  
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.setCentralWidget(self.ui)
 
