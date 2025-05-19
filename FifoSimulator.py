@@ -2,6 +2,7 @@ from PySide6.QtWidgets import QLabel
 from PySide6.QtCore import Qt
 
 class FifoSimulator:
+    # Initializes the FIFO simulator with the UI object.
     def __init__(self, ui):
         self.ui = ui
         self.reference_string = []
@@ -10,6 +11,7 @@ class FifoSimulator:
         self.current_index = 0
         self.page_faults = 0
 
+    # Starts the FIFO simulation with the given reference string and number of frames.
     def start(self, reference_string, max_frames):
         self.reference_string = reference_string.split()
         self.max_frames = max_frames
@@ -22,6 +24,7 @@ class FifoSimulator:
         self.clear_layouts()
         self.process_current_page()
 
+    # Processes the next page in the reference string.
     def next(self):
         self.current_index += 1
         if self.current_index < len(self.reference_string):
@@ -29,6 +32,7 @@ class FifoSimulator:
         else:
             self.ui.Completion_Label.setVisible(True)
 
+    # Processes the current page based on the FIFO algorithm.
     def process_current_page(self):
         self.clear_layouts()
 
@@ -77,11 +81,13 @@ class FifoSimulator:
             else:
                 self.add_box_to_frame(self.ui.New_Process, p)
 
+    # Clear all layouts in the UI
     def clear_layouts(self):
         self.clear_frame(self.ui.Current_Process)
         self.clear_frame(self.ui.Added_Page)
         self.clear_frame(self.ui.New_Process)
 
+    # Clear all widgets in a given frame
     def clear_frame(self, frame):
         layout = frame.layout()
         if layout:
@@ -91,6 +97,7 @@ class FifoSimulator:
                 if widget:
                     widget.setParent(None)
 
+    # Adds the frame on the simulation screen with the given page and color.
     def add_box_to_frame(self, frame, text, color=None):
         label = QLabel(text)
         style = "border: 1px solid #555; border-radius: 5px; padding: 5px; font-size: 16px; color: white;"
@@ -102,6 +109,7 @@ class FifoSimulator:
         if layout:
             layout.addWidget(label)
 
+    # Clears the simulation and resets the UI.
     def clear_simulation(self):
         self.reference_string = []
         self.frames = []
