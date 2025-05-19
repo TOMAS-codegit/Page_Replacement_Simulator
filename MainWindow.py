@@ -1,6 +1,7 @@
 import os
 import sys
 import random
+from PySide6.QtWidgets import QSizePolicy
 from PySide6.QtWidgets import QMainWindow, QMessageBox
 from PySide6.QtUiTools import QUiLoader
 from PageSequenceDisplay import display_page_sequence
@@ -54,7 +55,8 @@ class MainWindow(QMainWindow):
 
         # Window settings
         self.setWindowTitle("Page Replacement Algorithms")
-        self.setFixedSize(self.ui.size())
+        self.setMinimumSize(1000, 800)  # reasonable default
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.setCentralWidget(self.ui)
 
     # Generate a random reference string based on user input and display it in the reference string line edit
@@ -83,6 +85,13 @@ class MainWindow(QMainWindow):
         print(f"Selected algorithm: {algo}")
         self.selected_algorithm = algo
 
+        # Set the Algorithm name in the Line Edit
+        if self.selected_algorithm:
+            self.ui.Algorithm_Line_Edit.setText(self.selected_algorithm)
+        else:
+            self.ui.Algorithm_Line_Edit.setText("None")
+            return
+
     # Start the simulation
     def start_simulation(self):
         self.ui.Next_Button.setEnabled(True)
@@ -94,13 +103,6 @@ class MainWindow(QMainWindow):
             return
 
         frames = int(frame_text)
-
-        # Set the Algorithm name in the Line Edit
-        if self.selected_algorithm:
-            self.ui.Algorithm_Line_Edit.setText(self.selected_algorithm)
-        else:
-            self.ui.Algorithm_Line_Edit.setText("None")
-            return
 
         if self.selected_algorithm == "FIFO":
             self.fifo_simulator.start(reference, frames)
